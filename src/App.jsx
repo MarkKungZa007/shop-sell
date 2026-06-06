@@ -1,23 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { defaultProducts } from "./data/defaultProducts";
+import { defaultRooms } from "./data/defaultRooms";
+import { defaultCollages } from "./data/defaultCollages";
+import { defaultCatalog } from "./data/defaultCatalog";
 import RoomCanvas from "./components/RoomCanvas";
 import AdminPanel from "./components/AdminPanel";
-
-import roomImg from "./assets/minimalist_room.png";
-import bedroomImg from "./assets/minimalist_bedroom.png";
-import kitchenImg from "./assets/minimalist_kitchen.png";
-
-// Import Baan Lae Suan detail assets
-import rusticLivingRoom from "./assets/rustic_living_room.png";
-import japandiDining from "./assets/japandi_dining.png";
-import botanicalBathroom from "./assets/botanical_bathroom.png";
-import bohemianTerrace from "./assets/bohemian_terrace.png";
-import gardenGreenhouse from "./assets/garden_greenhouse.png";
-import industrialStudy from "./assets/industrial_study.png";
-import readingNook from "./assets/reading_nook.png";
-import countryKitchen from "./assets/country_kitchen.png";
-import tropicalBedroom from "./assets/tropical_bedroom.png";
-import zenCorner from "./assets/zen_corner.png";
 
 const getLocationLabel = (canvasType) => {
   if (!canvasType || canvasType === "main") return "ภาพห้องหลัก";
@@ -29,101 +16,6 @@ const getLocationLabel = (canvasType) => {
   return "รูปมุมย่อย";
 };
 
-const defaultRooms = [
-  { 
-    id: "living-room", 
-    name: "HOME OFFICE", 
-    image: roomImg,
-    styleTitle: "Japandi Workspace (พื้นที่ทำงานกลิ่นอายแจแปนดี้)",
-    description: "การผสมผสานระหว่างความเงียบสงบอบอุ่นแบบญี่ปุ่น (Wabi-Sabi) และความเรียบง่ายใช้งานได้จริงสไตล์สแกนดิเนเวียน (Hygge) เน้นเฟอร์นิเจอร์ไม้โทนอุ่นและพื้นที่เปิดโล่งเพื่อสร้างสมาธิในการทำงานที่ดีที่สุด",
-    details: {
-      concept: "Japandi Style",
-      colors: [
-        { name: "Cream Silk (ครีมทราย)", hex: "#FAF6F0" },
-        { name: "Soft Sky (ฟ้านวล)", hex: "#E0F2FE" },
-        { name: "Warm Oak (โอ๊คอบอุ่น)", hex: "#D97706" }
-      ],
-      features: [
-        "เฟอร์นิเจอร์โครงสร้างไม้แท้ ขอบโค้งมนเพื่อความรู้สึกละมุนตา",
-        "จัดวางสิ่งของน้อยชิ้นแต่ฟังก์ชันครบครัน (Minimal & Functional)",
-        "เพิ่มพื้นที่สีเขียวด้วยพืชใบใหญ่เพื่อช่วยกรองสายตาและผ่อนคลาย"
-      ],
-      tips: "ลองจับคู่โคมไฟทำงานสีดำด้านเข้ากับโต๊ะไม้ธรรมชาติ จะช่วยสร้างจุดโฟกัสที่โดดเด่นตัดกันได้อย่างลงตัวโดยไม่ทำลายโทนความอบอุ่นของห้อง"
-    }
-  },
-  { 
-    id: "bedroom", 
-    name: "MINIMAL BEDROOM", 
-    image: bedroomImg,
-    styleTitle: "Warm Minimalist Cozy (ห้องนอนมินิมอลอบอุ่น)",
-    description: "ห้องนอนที่เน้นการตัดทอนสิ่งรบกวนสายตาออกไปให้หมด คงเหลือไว้เพียงองค์ประกอบที่จำเป็นเพื่อสร้างความรู้สึกปลอดภัย เงียบสงบ และช่วยให้ร่างกายได้เข้าสู่สภาวะพักผ่อนอย่างแท้จริง",
-    details: {
-      concept: "Warm Minimalism",
-      colors: [
-        { name: "Linen Beige (เบจผ้าลินิน)", hex: "#F3EFE0" },
-        { name: "Soft Sand (ทรายนุ่ม)", hex: "#E7E3D4" },
-        { name: "Charcoal Slate (เทาชาร์โคล)", hex: "#334155" }
-      ],
-      features: [
-        "โครงเตียงไม้แบบเตี้ยใกล้ชิดพื้น (Low-profile) เพื่อความรู้สึกผ่อนคลายและห้องดูเพดานสูงขึ้น",
-        "ชุดเครื่องนอนวัสดุเส้นใยธรรมชาติ เช่น ลินินออร์แกนิก ยิ่งยับยิ่งได้สัมผัสที่ดูสบายเป็นกันเอง",
-        "เน้นการกระจายแสงอ้อม (Soft Light) จากโคมไฟกระดาษทดแทนแสงไฟตรงจากเพดาน"
-      ],
-      tips: "หลีกเลี่ยงแสงไฟประเภท Daylight ในห้องนอนอย่างสิ้นเชิง ลองเลือกติดตั้งไฟ Warm Light ซ่อนไว้ตามหลังหัวเตียงหรือใต้โต๊ะข้างเพื่อสร้างบรรยากาศฟุ้งชวนนอนหลับ"
-    }
-  },
-  { 
-    id: "kitchen", 
-    name: "SCANDINAVIAN KITCHEN", 
-    image: kitchenImg,
-    styleTitle: "Scandinavian Bright Kitchen (ห้องครัวนอร์ดิกสว่างไสว)",
-    description: "ห้องครัวสไตล์นอร์ดิกที่เน้นความสว่างไสวเป็นหลัก การเปิดรับแสงธรรมชาติ การจัดวางเครื่องใช้ให้หยิบจับง่าย สะดวกสบาย และสร้างบรรยากาศอบอุ่นเป็นศูนย์รวมใจของครอบครัว",
-    details: {
-      concept: "Scandinavian Design",
-      colors: [
-        { name: "Bright Light (ขาวสว่าง)", hex: "#FFFFFF" },
-        { name: "Honey Oak (โอ๊คน้ำผึ้ง)", hex: "#CA8A04" },
-        { name: "Brass Accent (ทองเหลืองวาว)", hex: "#EAB308" }
-      ],
-      features: [
-        "เน้นการเปิดช่องแสงธรรมชาติและการตกแต่งโทนสีขาวเพื่อให้ห้องครัวดูกว้างขวางสะอาดตา",
-        "เคาน์เตอร์เกาะกลางอเนกประสงค์ (Island) ที่รวมทั้งพื้นที่จัดเตรียมอาหารและที่นั่งพูดคุย",
-        "โคมไฟเพดานทรงกรวยคู่ผิวทองเหลืองเพิ่มสัมผัสหรูหราคลาสสิกให้กับพื้นที่เตรียมอาหาร"
-      ],
-      tips: "ครัวสไตล์นี้เหมาะกับการโชว์เครื่องครัวสวยๆ เช่น กาน้ำชาเซรามิกคราฟต์หรือเขียงไม้ แนะนำให้วางเฉพาะชิ้นโปรดบนเคาน์เตอร์ และเก็บชิ้นที่เหลือเข้าลิ้นชักเพื่อรักษาความคลีน"
-    }
-  }
-];
-
-const defaultCollages = {
-  "living-room": {
-    img1: rusticLivingRoom,
-    img2: industrialStudy,
-    img3: readingNook,
-    img4: japandiDining,
-    img5: botanicalBathroom,
-    title: "มุมรายละเอียดสไตล์ Japandi",
-    description: "สัมผัสความอบอุ่นของงานไม้ธรรมชาติผสมผสานกับวัสดุธรรมชาติ ผิวสัมผัสเนื้อแมตต์ และแสงธรรมชาติที่ลอดผ่านหน้าต่าง ช่วยเพิ่มพลังสร้างสรรค์ในมุมทำงานอย่างลงตัว"
-  },
-  "bedroom": {
-    img1: tropicalBedroom,
-    img2: zenCorner,
-    img3: botanicalBathroom,
-    img4: bohemianTerrace,
-    img5: gardenGreenhouse,
-    title: "รายละเอียดการพักผ่อนอย่างเงียบสงบ",
-    description: "การเลือกใช้พรรณไม้สีเขียวขจีในกระถางดินเผา ผสมผสานกับผ้าลินินเนื้อละเอียดสีเอิร์ธโทน และการจัดวางเฟอร์นิเจอร์แบบ Low-profile เพื่อเปิดรับลมธรรมชาติได้อย่างอิสระ"
-  },
-  "kitchen": {
-    img1: countryKitchen,
-    img2: gardenGreenhouse,
-    img3: japandiDining,
-    img4: rusticLivingRoom,
-    img5: readingNook,
-    title: "ความงดงาม of แสงแดดและงานครัวนอร์ดิก",
-    description: "เน้นการโชว์รายละเอียดของเครื่องแก้วใส อุปกรณ์ทำครัวผิวทองเหลืองตอกมือ และพืชสมุนไพรในร่มที่วางรับแดดริมหน้าต่าง ให้บรรยากาศเสมือนคาเฟ่สไตล์ยุโรปตอนเหนือ"
-  }
-};
 
 function EditorialCollage({ collage, products = [], highlightedId, onSelectProduct }) {
 
@@ -254,7 +146,7 @@ export default function App() {
 
   // Load rooms from localStorage or use defaults
   const [rooms, setRooms] = useState(() => {
-    const saved = localStorage.getItem("minimal_room_list_v1");
+    const saved = localStorage.getItem("minimal_room_list_v2");
     if (saved) {
       try {
         return JSON.parse(saved);
@@ -267,12 +159,12 @@ export default function App() {
 
   const handleUpdateRooms = (newRoomsList) => {
     setRooms(newRoomsList);
-    localStorage.setItem("minimal_room_list_v1", JSON.stringify(newRoomsList));
+    localStorage.setItem("minimal_room_list_v2", JSON.stringify(newRoomsList));
   };
 
   // Collage state per room
   const [roomCollages, setRoomCollages] = useState(() => {
-    const saved = localStorage.getItem("minimal_room_collages_v1");
+    const saved = localStorage.getItem("minimal_room_collages_v2");
     if (saved) {
       try {
         return JSON.parse(saved);
@@ -291,12 +183,12 @@ export default function App() {
       newCollages[roomId] = updatedCollage;
     }
     setRoomCollages(newCollages);
-    localStorage.setItem("minimal_room_collages_v1", JSON.stringify(newCollages));
+    localStorage.setItem("minimal_room_collages_v2", JSON.stringify(newCollages));
   };
   
   // Load products from localStorage or use defaults
   const [products, setProducts] = useState(() => {
-    const saved = localStorage.getItem("minimal_room_products_v2");
+    const saved = localStorage.getItem("minimal_room_products_v3");
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -313,7 +205,7 @@ export default function App() {
           return p;
         });
         if (updated) {
-          localStorage.setItem("minimal_room_products_v2", JSON.stringify(migrated));
+          localStorage.setItem("minimal_room_products_v3", JSON.stringify(migrated));
           return migrated;
         }
         return parsed;
@@ -322,9 +214,74 @@ export default function App() {
       }
     }
     // Save defaults to localStorage initially
-    localStorage.setItem("minimal_room_products_v2", JSON.stringify(defaultProducts));
-    return defaultProducts;
+    localStorage.setItem("minimal_room_products_v3", JSON.stringify(defaultProducts));
   });
+
+  // Load catalog from localStorage or use defaults
+  const [catalog, setCatalog] = useState(() => {
+    const saved = localStorage.getItem("minimal_room_catalog_v2");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        // Migration: Inject image if missing for default catalog items
+        let updated = false;
+        const migrated = parsed.map(item => {
+          if (!item.image) {
+            const defMatch = defaultCatalog.find(dc => dc.name === item.name);
+            if (defMatch && defMatch.image) {
+              updated = true;
+              return { ...item, image: defMatch.image };
+            }
+          }
+          return item;
+        });
+        if (updated) {
+          localStorage.setItem("minimal_room_catalog_v2", JSON.stringify(migrated));
+          return migrated;
+        }
+        return parsed;
+      } catch (e) {
+        console.error("Error loading catalog from localStorage, using defaults", e);
+      }
+    }
+    // Save defaults to localStorage initially
+    localStorage.setItem("minimal_room_catalog_v2", JSON.stringify(defaultCatalog));
+    return defaultCatalog;
+  });
+
+  const updateCatalog = (newCatalog) => {
+    setCatalog(newCatalog);
+    localStorage.setItem("minimal_room_catalog_v2", JSON.stringify(newCatalog));
+  };
+
+  // Auto-sync with local disk in development environment
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetch('/api/save-data', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          rooms,
+          roomCollages,
+          products,
+          catalog
+        }),
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          console.log('Saved changes directly to disk!');
+        }
+      })
+      .catch(err => {
+        // Silently fail in production
+      });
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [rooms, roomCollages, products, catalog]);
 
   // Highlighted hotspot ID (when locating from card list)
   const [highlightedId, setHighlightedId] = useState(null);
@@ -350,7 +307,7 @@ export default function App() {
 
   // Magazine Room Gallery States
   const [currentRoomId, setCurrentRoomId] = useState(() => {
-    const saved = localStorage.getItem("minimal_room_list_v1");
+    const saved = localStorage.getItem("minimal_room_list_v2");
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -361,7 +318,7 @@ export default function App() {
         console.error("Error loading rooms for currentRoomId", e);
       }
     }
-    return "living-room";
+    return defaultRooms[0]?.id || "room-1780739717638";
   });
   const [isTransitioning, setIsTransitioning] = useState(false);
 
@@ -380,7 +337,7 @@ export default function App() {
 
   // Filter products for the active room page
   const activeRoomProducts = products.filter(
-    (p) => p.roomId === currentRoomId || (!p.roomId && currentRoomId === "living-room")
+    (p) => p.roomId === currentRoomId || (!p.roomId && currentRoomId === (defaultRooms[0]?.id || "room-1780739717638"))
   );
 
   // Active room metadata helper
@@ -442,7 +399,7 @@ export default function App() {
   // Save changes to products list
   const updateProducts = (newProductsList) => {
     setProducts(newProductsList);
-    localStorage.setItem("minimal_room_products_v2", JSON.stringify(newProductsList));
+    localStorage.setItem("minimal_room_products_v3", JSON.stringify(newProductsList));
   };
 
   // Helper to normalize name for comparison: trim, lowercase, strip special characters/emojis
@@ -800,6 +757,8 @@ export default function App() {
             rooms={rooms}
             onUpdateRooms={handleUpdateRooms}
             onRoomChange={setCurrentRoomId}
+            catalog={catalog}
+            onUpdateCatalog={updateCatalog}
           />
         )}
       </main>

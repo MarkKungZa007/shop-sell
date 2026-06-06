@@ -12,7 +12,9 @@ export default function AdminPanel({
   onUpdateRoomCollage,
   rooms = [],
   onUpdateRooms,
-  onRoomChange
+  onRoomChange,
+  catalog = [],
+  onUpdateCatalog
 }) {
   const [passcode, setPasscode] = useState("");
   
@@ -174,52 +176,7 @@ export default function AdminPanel({
     setSelectedCatalogIdForProduct(null);
   };
 
-  // Stock Catalog State
-  const [catalog, setCatalog] = useState(() => {
-    const saved = localStorage.getItem("minimal_room_catalog_v1");
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        // Migration: Inject image if missing for default products
-        let updated = false;
-        const migrated = parsed.map(item => {
-          if (!item.image) {
-            const defMatch = defaultProducts.find(dp => dp.name === item.name);
-            if (defMatch && defMatch.image) {
-              updated = true;
-              return { ...item, image: defMatch.image };
-            }
-          }
-          return item;
-        });
-        if (updated) {
-          localStorage.setItem("minimal_room_catalog_v1", JSON.stringify(migrated));
-          return migrated;
-        }
-        return parsed;
-      } catch (e) {
-        console.error("Error loading catalog", e);
-      }
-    }
-    // Pre-populate with deduplicated defaultProducts by name
-    const uniqueProducts = [];
-    const seenNames = new Set();
-    defaultProducts.forEach(p => {
-      if (!seenNames.has(p.name)) {
-        seenNames.add(p.name);
-        uniqueProducts.push({
-          id: `cat-${p.id}`,
-          name: p.name,
-          price: p.price,
-          description: p.description || "",
-          url: p.url || "",
-          image: p.image || ""
-        });
-      }
-    });
-    localStorage.setItem("minimal_room_catalog_v1", JSON.stringify(uniqueProducts));
-    return uniqueProducts;
-  });
+
 
   // Catalog Form states
   const [selectedCatalogId, setSelectedCatalogId] = useState(null);
@@ -276,8 +233,7 @@ export default function AdminPanel({
       onAddToast(`เพิ่มสินค้า "${catName}" ลงในคลังสำเร็จ`, "success");
     }
 
-    setCatalog(updatedCatalog);
-    localStorage.setItem("minimal_room_catalog_v1", JSON.stringify(updatedCatalog));
+    onUpdateCatalog(updatedCatalog);
     resetCatalogForm();
   };
 
@@ -285,8 +241,7 @@ export default function AdminPanel({
     e.stopPropagation();
     if (window.confirm(`คุณต้องการลบสินค้า "${itemName}" ออกจากคลังสินค้าหลักใช่หรือไม่?\n* การลบนี้จะทำการลบตำแหน่งปักหมุดของสินค้านี้ออกจากทุกห้องด้วย`)) {
       const updatedCatalog = catalog.filter((item) => item.id !== id);
-      setCatalog(updatedCatalog);
-      localStorage.setItem("minimal_room_catalog_v1", JSON.stringify(updatedCatalog));
+      onUpdateCatalog(updatedCatalog);
       
       // Also delete all product pins associated with this catalog item (by catalogId or name)
       const updatedProducts = products.filter((p) => p.catalogId !== id && p.name !== itemName);
@@ -647,8 +602,10 @@ export default function AdminPanel({
   // Reset defaults
   const handleResetToDefaults = () => {
     if (window.confirm("คุณต้องการรีเซ็ตสินค้าและคลังสินค้าทั้งหมดกลับไปเป็นค่าเริ่มต้นจากระบบใช่หรือไม่?")) {
-      localStorage.removeItem("minimal_room_products_v2");
-      localStorage.removeItem("minimal_room_catalog_v1");
+      localStorage.removeItem("minimal_room_list_v2");
+      localStorage.removeItem("minimal_room_collages_v2");
+      localStorage.removeItem("minimal_room_products_v3");
+      localStorage.removeItem("minimal_room_catalog_v2");
       window.location.reload();
     }
   };
@@ -698,16 +655,16 @@ export default function AdminPanel({
           const { rooms: impRooms, roomCollages: impCollages, products: impProducts, catalog: impCatalog } = imported;
           
           if (impRooms && Array.isArray(impRooms)) {
-            localStorage.setItem("minimal_room_list_v1", JSON.stringify(impRooms));
+            localStorage.setItem("minimal_room_list_v2", JSON.stringify(impRooms));
           }
           if (impCollages && typeof impCollages === "object") {
-            localStorage.setItem("minimal_room_collages_v1", JSON.stringify(impCollages));
+            localStorage.setItem("minimal_room_collages_v2", JSON.stringify(impCollages));
           }
           if (impProducts && Array.isArray(impProducts)) {
-            localStorage.setItem("minimal_room_products_v2", JSON.stringify(impProducts));
+            localStorage.setItem("minimal_room_products_v3", JSON.stringify(impProducts));
           }
           if (impCatalog && Array.isArray(impCatalog)) {
-            localStorage.setItem("minimal_room_catalog_v1", JSON.stringify(impCatalog));
+            localStorage.setItem("minimal_room_catalog_v2", JSON.stringify(impCatalog));
           }
           
           onAddToast("นำเข้าข้อมูลระบบทั้งหมดสำเร็จแล้ว! ระบบกำลังรีโหลดหน้าเว็บเพื่อแสดงผล...", "success");
