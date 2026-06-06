@@ -557,14 +557,20 @@ export default function AdminPanel({
 
   // Export JSON Backup
   const handleExportBackup = () => {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(products, null, 2));
+    const backupData = {
+      rooms: rooms,
+      roomCollages: roomCollages,
+      products: products,
+      catalog: catalog
+    };
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
     const downloadAnchor = document.createElement("a");
     downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", "room_shop_bounding_boxes_backup.json");
+    downloadAnchor.setAttribute("download", "dream_room_full_backup.json");
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
-    onAddToast("ส่งออกไฟล์สำรองข้อมูลสำเร็จ", "success");
+    onAddToast("ส่งออกข้อมูลระบบทั้งหมดสำเร็จ (รายชื่อห้อง, คอลลาจ, สินค้าในคลัง และจุดปักหมุด)", "success");
   };
 
   // Import JSON Backup
@@ -576,18 +582,42 @@ export default function AdminPanel({
     fileReader.onload = (event) => {
       try {
         const imported = JSON.parse(event.target.result);
+        
         if (Array.isArray(imported)) {
+          // Old backup format (only products)
           const isValid = imported.every(
             (p) => p.id && p.name && p.price && typeof p.x === "number" && typeof p.y === "number"
           );
           if (isValid) {
             onUpdateProducts(imported);
-            onAddToast("นำเข้าไฟล์สำรองข้อมูลเรียบร้อย", "success");
+            onAddToast("นำเข้าตำแหน่งปักหมุดสำเร็จแล้ว ระบบกำลังรีโหลด...", "success");
+            setTimeout(() => window.location.reload(), 1500);
           } else {
             alert("รูปแบบข้อมูลไฟล์สำรองไม่ถูกต้อง");
           }
+        } else if (imported && typeof imported === "object") {
+          // New full backup format
+          const { rooms: impRooms, roomCollages: impCollages, products: impProducts, catalog: impCatalog } = imported;
+          
+          if (impRooms && Array.isArray(impRooms)) {
+            localStorage.setItem("minimal_room_list_v1", JSON.stringify(impRooms));
+          }
+          if (impCollages && typeof impCollages === "object") {
+            localStorage.setItem("minimal_room_collages_v1", JSON.stringify(impCollages));
+          }
+          if (impProducts && Array.isArray(impProducts)) {
+            localStorage.setItem("minimal_room_products_v2", JSON.stringify(impProducts));
+          }
+          if (impCatalog && Array.isArray(impCatalog)) {
+            localStorage.setItem("minimal_room_catalog_v1", JSON.stringify(impCatalog));
+          }
+          
+          onAddToast("นำเข้าข้อมูลระบบทั้งหมดสำเร็จแล้ว! ระบบกำลังรีโหลดหน้าเว็บเพื่อแสดงผล...", "success");
+          setTimeout(() => {
+            window.location.reload();
+          }, 1500);
         } else {
-          alert("รูปแบบไฟล์สำรองต้องเป็นรายการอาร์เรย์ของสินค้า");
+          alert("รูปแบบไฟล์สำรองไม่ถูกต้อง");
         }
       } catch (err) {
         alert("เกิดข้อผิดพลาดในการอ่านไฟล์ JSON");
