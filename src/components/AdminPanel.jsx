@@ -43,6 +43,7 @@ export default function AdminPanel({
   const [newRoomImage, setNewRoomImage] = useState("");
   const [newRoomConcept, setNewRoomConcept] = useState("");
   const [newRoomTips, setNewRoomTips] = useState("");
+  const [editingRoomId, setEditingRoomId] = useState(null);
   
   // Color palette (3 colors)
   const [color1Name, setColor1Name] = useState("");
@@ -346,10 +347,123 @@ export default function AdminPanel({
     }
   };
 
+  const resetRoomForm = () => {
+    setEditingRoomId(null);
+    setNewRoomName("");
+    setNewRoomStyleTitle("");
+    setNewRoomDesc("");
+    setNewRoomImage("");
+    setNewRoomConcept("");
+    setNewRoomTips("");
+    setColor1Name("");
+    setColor1Hex("");
+    setColor2Name("");
+    setColor2Hex("");
+    setColor3Name("");
+    setColor3Hex("");
+    setFeat1("");
+    setFeat2("");
+    setFeat3("");
+  };
+
+  const selectRoomForEditing = (room) => {
+    setEditingRoomId(room.id);
+    setNewRoomName(room.name || "");
+    setNewRoomStyleTitle(room.styleTitle || "");
+    setNewRoomDesc(room.description || "");
+    setNewRoomImage(room.image || "");
+    if (room.details) {
+      setNewRoomConcept(room.details.concept || "");
+      setNewRoomTips(room.details.tips || "");
+      if (room.details.colors && room.details.colors.length >= 3) {
+        setColor1Name(room.details.colors[0].name || "");
+        setColor1Hex(room.details.colors[0].hex || "");
+        setColor2Name(room.details.colors[1].name || "");
+        setColor2Hex(room.details.colors[1].hex || "");
+        setColor3Name(room.details.colors[2].name || "");
+        setColor3Hex(room.details.colors[2].hex || "");
+      } else {
+        setColor1Name("");
+        setColor1Hex("");
+        setColor2Name("");
+        setColor2Hex("");
+        setColor3Name("");
+        setColor3Hex("");
+      }
+      if (room.details.features && room.details.features.length >= 3) {
+        setFeat1(room.details.features[0] || "");
+        setFeat2(room.details.features[1] || "");
+        setFeat3(room.details.features[2] || "");
+      } else {
+        setFeat1("");
+        setFeat2("");
+        setFeat3("");
+      }
+    } else {
+      setNewRoomConcept("");
+      setNewRoomTips("");
+      setColor1Name("");
+      setColor1Hex("");
+      setColor2Name("");
+      setColor2Hex("");
+      setColor3Name("");
+      setColor3Hex("");
+      setFeat1("");
+      setFeat2("");
+      setFeat3("");
+    }
+    onAddToast(`โหลดข้อมูลห้อง "${room.name}" เพื่อแก้ไขเรียบร้อยแล้ว`, "success");
+    
+    // Scroll and focus on new-room-name
+    setTimeout(() => {
+      const formInput = document.getElementById("new-room-name");
+      if (formInput) {
+        formInput.scrollIntoView({ behavior: "smooth", block: "center" });
+        formInput.focus();
+      }
+    }, 100);
+  };
+
   const handleCreateRoom = (e) => {
     e.preventDefault();
     if (!newRoomName || !newRoomStyleTitle || !newRoomImage) {
       onAddToast("กรุณากรอกชื่อห้อง หัวข้อสไตล์ และอัปโหลดรูปภาพห้องหลัก", "info");
+      return;
+    }
+
+    if (editingRoomId) {
+      const updatedRooms = rooms.map((r) => {
+        if (r.id === editingRoomId) {
+          return {
+            ...r,
+            name: newRoomName.toUpperCase(),
+            image: newRoomImage,
+            styleTitle: newRoomStyleTitle,
+            description: newRoomDesc || "คำอธิบายภาพและอารมณ์ความรู้สึกของการตกแต่งมุมนี้",
+            details: {
+              concept: newRoomConcept || "Style Concept",
+              colors: [
+                { name: color1Name || "Color 1", hex: color1Hex || "#CCCCCC" },
+                { name: color2Name || "Color 2", hex: color2Hex || "#CCCCCC" },
+                { name: color3Name || "Color 3", hex: color3Hex || "#CCCCCC" }
+              ],
+              features: [
+                feat1 || "เอกลักษณ์ที่ 1",
+                feat2 || "เอกลักษณ์ที่ 2",
+                feat3 || "เอกลักษณ์ที่ 3"
+              ],
+              tips: newRoomTips || "คำแนะนำในการจัดมุมสไตล์นี้ให้สวยงาม"
+            }
+          };
+        }
+        return r;
+      });
+
+      if (onUpdateRooms) {
+        onUpdateRooms(updatedRooms);
+        onAddToast(`แก้ไขข้อมูลห้อง "${newRoomName}" สำเร็จ`, "success");
+        resetRoomForm();
+      }
       return;
     }
 
@@ -379,23 +493,7 @@ export default function AdminPanel({
     if (onUpdateRooms) {
       onUpdateRooms([...rooms, newRoomObj]);
       onAddToast(`เพิ่มห้อง "${newRoomName}" เรียบร้อยแล้ว`, "success");
-      
-      // Reset form fields
-      setNewRoomName("");
-      setNewRoomStyleTitle("");
-      setNewRoomDesc("");
-      setNewRoomImage("");
-      setNewRoomConcept("");
-      setNewRoomTips("");
-      setColor1Name("");
-      setColor1Hex("");
-      setColor2Name("");
-      setColor2Hex("");
-      setColor3Name("");
-      setColor3Hex("");
-      setFeat1("");
-      setFeat2("");
-      setFeat3("");
+      resetRoomForm();
     }
   };
 
@@ -1493,10 +1591,10 @@ export default function AdminPanel({
 
       {adminTab === "rooms" && (
         <div className="admin-workspace admin-rooms-workspace animate-fade-in" style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '2rem' }}>
-          {/* Left Column: Create New Room Form */}
+          {/* Left Column: Create/Edit Room Form */}
           <div className="admin-canvas-card" style={{ padding: '2rem' }}>
             <h3 style={{ marginBottom: '1.5rem', fontFamily: 'Lora, serif', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>
-              เพิ่มห้อง / พื้นที่จัดแสดงใหม่
+              {editingRoomId ? `แก้ไขข้อมูลห้องจัดแสดง: ${newRoomName}` : "เพิ่มห้อง / พื้นที่จัดแสดงใหม่"}
             </h3>
             
             <form onSubmit={handleCreateRoom} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
@@ -1632,9 +1730,16 @@ export default function AdminPanel({
                 </div>
               </div>
 
-              <button type="submit" className="btn-submit" style={{ background: 'var(--color-primary)', marginTop: '1rem' }}>
-                สร้างห้องจัดแสดงใหม่ (Create Room)
-              </button>
+              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
+                <button type="submit" className="btn-submit" style={{ flex: 1, background: 'var(--color-primary)', margin: 0 }}>
+                  {editingRoomId ? "บันทึกการแก้ไขห้อง (Save Room)" : "สร้างห้องจัดแสดงใหม่ (Create Room)"}
+                </button>
+                {editingRoomId && (
+                  <button type="button" className="btn-cancel" onClick={resetRoomForm} style={{ flex: 0.4 }}>
+                    ยกเลิกการแก้ไข
+                  </button>
+                )}
+              </div>
             </form>
           </div>
 
@@ -1672,22 +1777,40 @@ export default function AdminPanel({
                       {room.styleTitle}
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => handleDeleteRoom(room.id, room.name)}
-                    style={{
-                      background: 'rgba(239, 68, 68, 0.1)',
-                      color: 'var(--color-danger)',
-                      border: 'none',
-                      padding: '0.4rem 0.6rem',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      fontSize: '0.75rem',
-                      fontWeight: 'bold'
-                    }}
-                  >
-                    ลบ
-                  </button>
+                  <div style={{ display: 'flex', gap: '0.4rem', flexShrink: 0 }}>
+                    <button
+                      type="button"
+                      onClick={() => selectRoomForEditing(room)}
+                      style={{
+                        background: 'rgba(43, 76, 48, 0.1)',
+                        color: 'var(--color-primary)',
+                        border: 'none',
+                        padding: '0.4rem 0.6rem',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        fontSize: '0.75rem',
+                        fontWeight: 'bold'
+                      }}
+                    >
+                      แก้ไข
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteRoom(room.id, room.name)}
+                      style={{
+                        background: 'rgba(239, 68, 68, 0.1)',
+                        color: 'var(--color-danger)',
+                        border: 'none',
+                        padding: '0.4rem 0.6rem',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        fontSize: '0.75rem',
+                        fontWeight: 'bold'
+                      }}
+                    >
+                      ลบ
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
