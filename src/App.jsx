@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { Analytics } from "@vercel/analytics/react";
 import { defaultProducts } from "./data/defaultProducts";
 import { defaultRooms } from "./data/defaultRooms";
 import { defaultCollages } from "./data/defaultCollages";
 import { defaultCatalog } from "./data/defaultCatalog";
 import RoomCanvas from "./components/RoomCanvas";
 import AdminPanel from "./components/AdminPanel";
-
 const getLocationLabel = (canvasType) => {
   if (!canvasType || canvasType === "main") return "ภาพห้องหลัก";
   if (canvasType === "collage-1") return "รูปมุมย่อย 1";
@@ -839,6 +839,7 @@ export default function App() {
           <a href="#" className="footer-link" onClick={(e) => { e.preventDefault(); setActiveView("admin"); }}>ระบบหลังบ้าน</a>
         </div>
       </footer>
+      <Analytics />
     </div>
   );
 }
