@@ -17,7 +17,7 @@ const getLocationLabel = (canvasType) => {
 };
 
 
-function EditorialCollage({ collage, products = [], highlightedId, onSelectProduct }) {
+function EditorialCollage({ collage, products = [], highlightedId, onSelectProduct, roomName, styleTitle }) {
 
   const handleAreaClick = (product, e) => {
     e.stopPropagation();
@@ -45,6 +45,11 @@ function EditorialCollage({ collage, products = [], highlightedId, onSelectProdu
           {/* Pulsing Pin Dot */}
           <div className="ikea-pin">
             <div className="ikea-pin-inner"></div>
+          </div>
+
+          {/* Direct Price Tag for CTR */}
+          <div className="ikea-pin-price-tag">
+            {product.price}
           </div>
 
           <div className="hotspot-tooltip simplified">
@@ -86,7 +91,7 @@ function EditorialCollage({ collage, products = [], highlightedId, onSelectProdu
             {collage.img1 && (
               <div className="collage-slot small-slot">
                 <div className="collage-img-wrapper">
-                  <img src={collage.img1} alt="Detail image 1" className="collage-img" loading="lazy" />
+                  <img src={collage.img1} alt={`พิกัดของแต่งห้องนอน รูปมุมย่อย 1 สไตล์ ${styleTitle || roomName || ''}`} className="collage-img" loading="lazy" />
                 </div>
                 {renderHotspots("collage-1")}
               </div>
@@ -94,7 +99,7 @@ function EditorialCollage({ collage, products = [], highlightedId, onSelectProdu
             {collage.img2 && (
               <div className="collage-slot small-slot">
                 <div className="collage-img-wrapper">
-                  <img src={collage.img2} alt="Detail image 2" className="collage-img" loading="lazy" />
+                  <img src={collage.img2} alt={`พิกัดของแต่งห้องนอน รูปมุมย่อย 2 สไตล์ ${styleTitle || roomName || ''}`} className="collage-img" loading="lazy" />
                 </div>
                 {renderHotspots("collage-2")}
               </div>
@@ -107,7 +112,7 @@ function EditorialCollage({ collage, products = [], highlightedId, onSelectProdu
           <div className="collage-col-center">
             <div className="collage-slot tall-slot">
               <div className="collage-img-wrapper">
-                <img src={collage.img3} alt="Detail image 3" className="collage-img" loading="lazy" />
+                <img src={collage.img3} alt={`พิกัดของแต่งห้องนอน รูปมุมย่อย 3 สไตล์ ${styleTitle || roomName || ''}`} className="collage-img" loading="lazy" />
               </div>
               {renderHotspots("collage-3")}
             </div>
@@ -120,7 +125,7 @@ function EditorialCollage({ collage, products = [], highlightedId, onSelectProdu
             {collage.img4 && (
               <div className="collage-slot small-slot">
                 <div className="collage-img-wrapper">
-                  <img src={collage.img4} alt="Detail image 4" className="collage-img" loading="lazy" />
+                  <img src={collage.img4} alt={`พิกัดของแต่งห้องนอน รูปมุมย่อย 4 สไตล์ ${styleTitle || roomName || ''}`} className="collage-img" loading="lazy" />
                 </div>
                 {renderHotspots("collage-4")}
               </div>
@@ -128,7 +133,7 @@ function EditorialCollage({ collage, products = [], highlightedId, onSelectProdu
             {collage.img5 && (
               <div className="collage-slot small-slot">
                 <div className="collage-img-wrapper">
-                  <img src={collage.img5} alt="Detail image 5" className="collage-img" loading="lazy" />
+                  <img src={collage.img5} alt={`พิกัดของแต่งห้องนอน รูปมุมย่อย 5 สไตล์ ${styleTitle || roomName || ''}`} className="collage-img" loading="lazy" />
                 </div>
                 {renderHotspots("collage-5")}
               </div>
@@ -396,6 +401,33 @@ export default function App() {
     }, 3000);
   };
 
+  const [activeFaqIndex, setActiveFaqIndex] = useState(null);
+
+  const toggleFaq = (index) => {
+    setActiveFaqIndex(activeFaqIndex === index ? null : index);
+  };
+
+  const faqs = [
+    {
+      question: "อยากแต่งห้องนอนมินิมอล ต้องเริ่มเลือกเฟอร์นิเจอร์และของตกแต่งชิ้นไหนก่อน?",
+      answer: "เริ่มต้นแนะนำให้เลือกเตียงนอนและตู้เก็บของขนาดเล็กที่คุมโทนสีขาวหรือไม้ธรรมชาติเป็นหลัก จากนั้นจึงเสริมของตกแต่งที่มีดีไซน์เรียบง่าย เช่น โคมไฟตั้งโต๊ะแสงโทนอุ่น (Warm Light) พรมปูพื้นทรงกลม และต้นไม้ปลอมเพื่อเพิ่มพื้นที่สีเขียว การเลือกใช้พิกัดของแต่งห้องที่มีราคาคุ้มค่าจะช่วยคุมงบประมาณได้เป็นอย่างดี"
+    },
+    {
+      question: "การจัดห้องนอนขนาดเล็กให้ดูโปร่งและกว้าง มีเทคนิคอย่างไรบ้าง?",
+      answer: "เคล็ดลับสำคัญคือการจัดวางโต๊ะทำงานและเฟอร์นิเจอร์หลักขนานเข้าหาผนังเพื่อเปิดพื้นที่ทางเดินตรงกลางให้โล่งที่สุด เลือกใช้ชั้นวางของแบบโปร่งหรือชั้นลอยติดผนัง (เช่น Pegboard) แทนตู้เก็บของทึบ และใช้กระจกเงาเพื่อสะท้อนแสงธรรมชาติจากหน้าต่าง ซึ่งจะช่วยหลอกตาให้ห้องดูมีมิติและกว้างขึ้นอย่างเห็นได้ชัด"
+    },
+    {
+      question: "ช้อปเฟอร์นิเจอร์และพิกัดของแต่งห้องผ่าน DREAM ROOM มีข้อดีอย่างไร?",
+      answer: "DREAM ROOM ช่วยรวบรวมไอเดียจัดห้องในสไตล์ต่างๆ ไม่ว่าจะเป็น Cozy Gamer หรือ Pastel Vintage พร้อมปักหมุด 'พิกัดแต่งห้อง' บนภาพจำลอง 3D ให้คุณเห็นภาพการจัดวางจริงและราคาที่จับต้องได้ เมื่อถูกใจก็สามารถคลิกไปยังช่องทางสั่งซื้ออย่าง Shopee/Lazada ได้ทันที ช่วยประหยัดเวลาในการค้นหาและลดความผิดพลาดในการเลือกขนาดและสไตล์ของแต่งบ้าน"
+    },
+    {
+      question: "การจัดห้องคอมหรือมุมเล่นเกม (Gamer Room) ควรคุมโทนสีและแสงไฟอย่างไร?",
+      answer: "แนะนำให้เลือกใช้โต๊ะคอมสีเข้มหรือสีขาวเพื่อเป็นพื้นฐาน จากนั้นใช้ระบบจัดเก็บสายไฟให้เรียบร้อย และเพิ่มลูกเล่นด้วยไฟแถบ RGB หรือโคมไฟดีไซน์โมเดิร์น โทนสีอาจใช้สีเย็นอย่างน้ำเงิน-เทา แล้วสอดแทรกสีสันสดใสอย่างเหลืองหรือเขียวจากตู้หรือรถเข็นเก็บของ เพื่อช่วยสร้างพลังงานบวกและเป็นจุดนำสายตาที่น่าสนใจ"
+    }
+  ];
+
+
+
   // Save changes to products list
   const updateProducts = (newProductsList) => {
     setProducts(newProductsList);
@@ -491,6 +523,141 @@ export default function App() {
     }
   };
 
+  // Dynamic SEO Updates (Title, Description, JSON-LD Schema)
+  useEffect(() => {
+    if (activeView === "shop" && currentRoom) {
+      // Update Document Title
+      const titleText = `ไอเดียจัดห้องสไตล์ ${currentRoom.styleTitle} - แจกพิกัดของแต่งห้องนอน | DREAM ROOM`;
+      document.title = titleText;
+
+      // Update Meta Description
+      const descMeta = document.querySelector('meta[name="description"]');
+      const descriptionText = `${currentRoom.description || ""} ชมไอเดียพร้อมแจกพิกัดแต่งห้องนอนมินิมอล ช้อปตามได้ทันทีรวม ${activeRoomProducts.length} รายการ เช่น ${deduplicatedProducts.slice(0, 5).map(p => p.name).join(", ")}`;
+      if (descMeta) {
+        descMeta.setAttribute("content", descriptionText);
+      }
+
+      // Update Open Graph tags
+      const ogTitle = document.querySelector('meta[property="og:title"]');
+      const ogDesc = document.querySelector('meta[property="og:description"]');
+      const ogImage = document.querySelector('meta[property="og:image"]');
+      if (ogTitle) ogTitle.setAttribute("content", titleText);
+      if (ogDesc) ogDesc.setAttribute("content", descriptionText);
+      if (ogImage && currentRoom.image) ogImage.setAttribute("content", currentRoom.image);
+
+      // Update or Create JSON-LD Script
+      let jsonLdScript = document.getElementById("room-jsonld");
+      if (!jsonLdScript) {
+        jsonLdScript = document.createElement("script");
+        jsonLdScript.id = "room-jsonld";
+        jsonLdScript.type = "application/ld+json";
+        document.head.appendChild(jsonLdScript);
+      }
+
+      // Construct ItemList Schema for Products in the room
+      const productItems = deduplicatedProducts.map((p, index) => ({
+        "@type": "ListItem",
+        "position": index + 1,
+        "item": {
+          "@type": "Product",
+          "name": p.name,
+          "image": p.image || currentRoom.image,
+          "description": p.description || `พิกัดของแต่งห้อง ${p.name} ราคาดี ช้อปง่ายๆ จากลิ้งก์สั่งซื้อ`,
+          "offers": {
+            "@type": "Offer",
+            "price": p.price ? p.price.replace(/[^\d.]/g, "") : "0",
+            "priceCurrency": "THB",
+            "url": p.url || window.location.href,
+            "availability": "https://schema.org/InStock"
+          }
+        }
+      }));
+
+      const schemaData = [
+        {
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          "name": `ไอเดียจัดห้องแบบ ${currentRoom.styleTitle} | พิกัดของแต่งห้องมินิมอล`,
+          "description": currentRoom.description,
+          "itemListElement": productItems
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": faqs.map(faq => ({
+            "@type": "Question",
+            "name": faq.question,
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": faq.answer
+            }
+          }))
+        }
+      ];
+
+      jsonLdScript.text = JSON.stringify(schemaData);
+    } else {
+      // Reset to defaults
+      document.title = "แจกพิกัดแต่งห้องมินิมอล ไอเดียจัดห้องนอนจำลอง 3D ช้อปตามได้ทันที | DREAM ROOM";
+      const descMeta = document.querySelector('meta[name="description"]');
+      if (descMeta) {
+        descMeta.setAttribute(
+          "content",
+          "DREAM ROOM - รวมไอเดียแต่งห้องนอน จัดห้องนอนขนาดเล็ก พร้อมแจกพิกัดของแต่งห้องมินิมอล โต๊ะคอมเกมเมอร์ โต๊ะเครื่องแป้ง และเฟอร์นิเจอร์น่ารักๆ ช้อปตามรูปภาพห้องจำลองได้ทันที!"
+        );
+      }
+      const jsonLdScript = document.getElementById("room-jsonld");
+      if (jsonLdScript) {
+        jsonLdScript.remove();
+      }
+    }
+  }, [currentRoomId, currentRoom, activeRoomProducts, deduplicatedProducts, activeView]);
+
+  const [selectedShopItems, setSelectedShopItems] = useState([]);
+
+  // Auto-initialize selected items when room changes
+  useEffect(() => {
+    const activeProds = products.filter(
+      (p) => p.roomId === currentRoomId || (!p.roomId && currentRoomId === (defaultRooms[0]?.id || "room-1780739717638"))
+    );
+    const groups = [];
+    activeProds.forEach((p) => {
+      let matched = groups.find(g => areProductsEqual(p, g[0]));
+      if (matched) matched.push(p);
+      else groups.push([p]);
+    });
+    const dedupedIds = groups.map(g => g[0].id);
+    setSelectedShopItems(dedupedIds);
+  }, [currentRoomId, products]);
+
+  const toggleShopItem = (productId) => {
+    setSelectedShopItems(prev => 
+      prev.includes(productId) 
+        ? prev.filter(id => id !== productId)
+        : [...prev, productId]
+    );
+  };
+
+  const calculateTotalCost = () => {
+    return deduplicatedProducts
+      .filter(p => selectedShopItems.includes(p.id))
+      .reduce((sum, p) => {
+        const val = parseInt(p.price.replace(/[^\d]/g, ""), 10) || 0;
+        return sum + val;
+      }, 0);
+  };
+
+  const copySelectedCoordinates = () => {
+    const selectedProds = deduplicatedProducts.filter(p => selectedShopItems.includes(p.id));
+    if (selectedProds.length === 0) {
+      addToast("โปรดเลือกสินค้าอย่างน้อย 1 ชิ้นเพื่อคัดลอกพิกัด", "info");
+      return;
+    }
+    const text = selectedProds.map(p => `- ${p.name} (${p.price}): ${p.url || 'ไม่มีลิงก์'}`).join("\n");
+    navigator.clipboard.writeText(`แจกพิกัดของแต่งห้องนอนมินิมอล จาก DREAM ROOM (${currentRoom?.name} สไตล์ ${currentRoom?.styleTitle}):\n${text}\n\nเข้าชมภาพจำลอง 3D และจัดงบประมาณด้วยตนเองได้ที่: https://shop-sell-peach.vercel.app/`);
+    addToast("คัดลอกพิกัดสินค้าและลิงก์เรียบร้อยแล้ว!", "success");
+  };
+
   return (
     <div className="app-container">
       {/* Background Decorative Blur Blobs */}
@@ -553,6 +720,7 @@ export default function App() {
             {/* Header Description */}
             <div className="page-header">
               <h1>Create your dream room</h1>
+              <p className="page-seo-title">แจกพิกัดแต่งห้องนอนมินิมอล & ไอเดียจัดห้องจำลอง 3D</p>
             </div>
 
             {/* Editorial Magazine Index Style */}
@@ -594,6 +762,7 @@ export default function App() {
                   isTransitioning={isTransitioning}
                   onPrevPage={slideshowImages.length > 1 ? handlePrevImage : null}
                   onNextPage={slideshowImages.length > 1 ? handleNextImage : null}
+                  roomAlt={`ไอเดียจัดห้องนอน - แต่งห้องสไตล์ ${currentRoom?.styleTitle || ''} - ${currentRoom?.name || ''}`}
                 />
               </div>
 
@@ -659,6 +828,8 @@ export default function App() {
                 products={activeRoomProducts}
                 highlightedId={highlightedId}
                 onSelectProduct={setSelectedProduct}
+                roomName={currentRoom?.name}
+                styleTitle={currentRoom?.styleTitle}
               />
             )}
 
@@ -671,6 +842,40 @@ export default function App() {
                 </h3>
               </div>
 
+              {deduplicatedProducts.length > 0 && (
+                <div className="budget-calculator-card animate-fade-in">
+                  <div className="calc-left">
+                    <span className="calc-badge">BUDGET ESTIMATOR</span>
+                    <h4 className="calc-title">เครื่องคำนวณงบประมาณจัดห้องนอน</h4>
+                    <p className="calc-desc">
+                      เลือกของแต่งห้องที่คุณต้องการเพื่อคำนวณงบประมาณ และคลิกคัดลอกพิกัด Shopee/Lazada ทั้งหมดได้ทันทีในคลิกเดียว เพื่อแชร์หรือเซฟเก็บไว้
+                    </p>
+                  </div>
+                  <div className="calc-right">
+                    <div className="calc-stats">
+                      <div className="stat-box">
+                        <span className="stat-label">สินค้าที่เลือก</span>
+                        <span className="stat-value">{selectedShopItems.length} / {deduplicatedProducts.length} ชิ้น</span>
+                      </div>
+                      <div className="stat-box highlighted">
+                        <span className="stat-label">งบประมาณรวม</span>
+                        <span className="stat-value">฿{calculateTotalCost().toLocaleString()}</span>
+                      </div>
+                    </div>
+                    <button 
+                      className="btn-copy-coords"
+                      onClick={copySelectedCoordinates}
+                    >
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px' }}>
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                      </svg>
+                      <span>คัดลอกพิกัดสินค้าที่เลือกทั้งหมด ({selectedShopItems.length})</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {deduplicatedProducts.length === 0 ? (
                 <p style={{ textAlign: "center", color: "var(--text-muted)", padding: "2rem" }}>
                   ไม่มีสินค้าจัดแสดงในขณะนี้ เข้าสู่ระบบหลังบ้านเพื่อเพิ่มจุดสินค้าชิ้นแรกของคุณ!
@@ -680,12 +885,22 @@ export default function App() {
                   {deduplicatedProducts.map((p) => (
                     <div
                       key={p.id}
-                      className="product-card"
+                      className={`product-card ${selectedShopItems.includes(p.id) ? 'selected-for-shopping' : ''}`}
                       onClick={() => setSelectedProduct(p)}
                     >
+                      <div className="product-card-selection" onClick={(e) => { e.stopPropagation(); toggleShopItem(p.id); }}>
+                        <div className={`product-checkbox ${selectedShopItems.includes(p.id) ? 'checked' : ''}`}>
+                          {selectedShopItems.includes(p.id) && (
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                          )}
+                        </div>
+                        <span className="checkbox-label">ใส่ตะกร้าพิกัด</span>
+                      </div>
                       {p.image && (p.displayType === "both" || p.displayType === "image" || !p.displayType) && (
                         <div className="product-card-img-wrapper">
-                          <img src={p.image} alt={p.name} className="product-card-img" loading="lazy" />
+                          <img src={p.image} alt={`พิกัดของแต่งห้องมินิมอล - ${p.name}`} className="product-card-img" loading="lazy" />
                         </div>
                       )}
                       
@@ -743,6 +958,49 @@ export default function App() {
                   ))}
                 </div>
               )}
+            </div>
+
+            {/* SEO Article & FAQ Section */}
+            <div className="seo-articles-faq">
+              <div className="seo-divider"></div>
+              
+              <section className="seo-intro-content">
+                <h3 className="seo-section-title">ไอเดียแต่งห้อง & เทคนิคจัดห้องนอน พร้อมแจกพิกัดของแต่งบ้านยอดนิยม | DREAM ROOM</h3>
+                <p>
+                  ยินดีต้อนรับสู่ <strong>DREAM ROOM</strong> แหล่งรวบรวม <strong>ไอเดียแต่งห้อง</strong> และแรงบันดาลใจในการ <strong>จัดห้อง</strong> ที่คัดสรรมาเป็นพิเศษสำหรับคนรักบ้านและชาวคอนโด 
+                  สำหรับใครที่กำลังหาวิธีการ <strong>แต่งห้องนอนมินิมอล</strong> ขนาดเล็กให้ดูโปร่ง โล่ง สบายตา หรือมองหาไอเดียจัดโต๊ะคอมเท่ๆ ด้วย <strong>โต๊ะคอมเกมเมอร์</strong> สำหรับเล่นเกมและทำงาน 
+                  เราได้รวบรวมภาพจำลองแบบ 3D และชี้เป้า <strong>พิกัดของแต่งห้องมินิมอล</strong> จากร้านค้ายอดนิยมใน Shopee และ Lazada มาให้คุณช้อปตามได้ทันที
+                </p>
+                <p>
+                  ที่ <strong>DREAM ROOM</strong> เราเชื่อว่าการแต่งห้องนอนสไตล์เกาหลี วินเทจร่วมสมัย หรือมินิมอลแบบอบอุ่น สามารถจัดตามได้จริง 
+                  คุณสามารถศึกษาการใช้โทนสี (Color Palette) การเลือกซื้อ <strong>โต๊ะคอมเกมเมอร์</strong> และเก้าอี้เพื่อสุขภาพ การจัดวางรูปแบบเฟอร์นิเจอร์ (Zoning) 
+                  และเคล็ดลับการแต่งหน้าต่างเพื่อเพิ่มแสงแดดธรรมชาติ เพื่อให้ได้การ <strong>แต่งห้องนอนมินิมอล</strong> ที่ออกมาสวยงามและมีฟังก์ชันการใช้งานที่ดีที่สุด
+                </p>
+              </section>
+
+              <section className="seo-faq-section">
+                <h3 className="seo-section-title">คำถามที่พบบ่อย (FAQ) เกี่ยวกับการจัดแต่งห้องนอน</h3>
+                <div className="faq-list">
+                  {faqs.map((faq, index) => {
+                    const isOpen = activeFaqIndex === index;
+                    return (
+                      <div key={index} className={`faq-item ${isOpen ? 'open' : ''}`}>
+                        <button 
+                          className="faq-question-btn" 
+                          onClick={() => toggleFaq(index)}
+                          aria-expanded={isOpen}
+                        >
+                          <span className="faq-question-text">{faq.question}</span>
+                          <span className="faq-toggle-icon">{isOpen ? '−' : '+'}</span>
+                        </button>
+                        <div className="faq-answer-container" style={{ maxHeight: isOpen ? '200px' : '0' }}>
+                          <p className="faq-answer-text">{faq.answer}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
             </div>
           </div>
         ) : (

@@ -8,7 +8,8 @@ export default function RoomCanvas({
   roomImage,
   isTransitioning,
   onPrevPage,
-  onNextPage
+  onNextPage,
+  roomAlt
 }) {
 
   const handleAreaClick = (product, e) => {
@@ -44,7 +45,7 @@ export default function RoomCanvas({
         {/* Room Background Image */}
         <img
           src={roomImage || roomImg}
-          alt="Minimalist Room"
+          alt={roomAlt || "ไอเดียแต่งห้องนอนมินิมอล จัดห้องคอมสไตล์ Cozy"}
           className="room-bg-image"
           draggable="false"
         />
@@ -67,6 +68,11 @@ export default function RoomCanvas({
               {/* Pulsing Pin Dot */}
               <div className="ikea-pin">
                 <div className="ikea-pin-inner"></div>
+              </div>
+
+              {/* Direct Price Tag for CTR */}
+              <div className="ikea-pin-price-tag">
+                {product.price}
               </div>
 
               {/* Tooltip Card (Desktop Hover handled purely via CSS :hover) */}

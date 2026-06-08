@@ -19,6 +19,11 @@ import collageImg_17 from "../assets/collage_design_room-1780741343069_img2.jpg"
 import collageImg_18 from "../assets/collage_design_room-1780741343069_img3.jpg";
 import collageImg_19 from "../assets/collage_design_room-1780741343069_img4.jpg";
 import collageImg_20 from "../assets/collage_design_room-1780741343069_img5.jpg";
+import collageImg_21 from "../assets/collage_design_room-1780843487744_img1.jpg";
+import collageImg_22 from "../assets/collage_design_room-1780843487744_img2.jpg";
+import collageImg_23 from "../assets/collage_design_room-1780843487744_img3.jpg";
+import collageImg_24 from "../assets/collage_design_room-1780843487744_img4.jpg";
+import collageImg_25 from "../assets/collage_design_room-1780843487744_img5.jpg";
 
 export const defaultCollages = {
   "living-room": {
@@ -56,5 +61,12 @@ export const defaultCollages = {
     img3: collageImg_18,
     img4: collageImg_19,
     img5: collageImg_20,
+  },
+  "room-1780843487744": {
+    img1: collageImg_21,
+    img2: collageImg_22,
+    img3: collageImg_23,
+    img4: collageImg_24,
+    img5: collageImg_25,
   },
 };
