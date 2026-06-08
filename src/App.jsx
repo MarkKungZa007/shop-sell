@@ -820,7 +820,7 @@ export default function App() {
       
       const { error: roomsErr } = await supabase
         .from("rooms")
-        .insert(roomsToInsert);
+        .upsert(roomsToInsert);
       if (roomsErr) throw roomsErr;
 
       const validRoomIds = roomsToInsert.map(r => r.id);
@@ -841,7 +841,7 @@ export default function App() {
       if (collagesToInsert.length > 0) {
         const { error: collagesErr } = await supabase
           .from("room_collages")
-          .insert(collagesToInsert);
+          .upsert(collagesToInsert);
         if (collagesErr) throw collagesErr;
       }
 
@@ -869,7 +869,7 @@ export default function App() {
       if (productsToInsert.length > 0) {
         const { error: productsErr } = await supabase
           .from("products")
-          .insert(productsToInsert);
+          .upsert(productsToInsert);
         if (productsErr) throw productsErr;
       }
 
@@ -883,7 +883,7 @@ export default function App() {
       }));
       const { error: catalogErr } = await supabase
         .from("catalog")
-        .insert(catalogToInsert);
+        .upsert(catalogToInsert);
       if (catalogErr) throw catalogErr;
 
       addToast("นำเข้าข้อมูลเริ่มต้นไปยัง Supabase สำเร็จ!", "success");
