@@ -6,6 +6,7 @@ import { defaultCollages } from "./data/defaultCollages";
 import { defaultCatalog } from "./data/defaultCatalog";
 import RoomCanvas from "./components/RoomCanvas";
 import AdminPanel from "./components/AdminPanel";
+import { supabase, isSupabaseConfigured } from "./supabaseClient";
 const getLocationLabel = (canvasType) => {
   if (!canvasType || canvasType === "main") return "ภาพห้องหลัก";
   if (canvasType === "collage-1") return "รูปมุมย่อย 1";
@@ -162,9 +163,45 @@ export default function App() {
     return defaultRooms;
   });
 
-  const handleUpdateRooms = (newRoomsList) => {
+  const handleUpdateRooms = async (newRoomsList) => {
     setRooms(newRoomsList);
     localStorage.setItem("minimal_room_list_v2", JSON.stringify(newRoomsList));
+
+    if (isSupabaseConfigured) {
+      try {
+        const deletedRoomIds = rooms
+          .filter(r => !newRoomsList.some(nr => nr.id === r.id))
+          .map(r => r.id);
+
+        if (deletedRoomIds.length > 0) {
+          const { error: deleteErr } = await supabase
+            .from("rooms")
+            .delete()
+            .in("id", deletedRoomIds);
+          if (deleteErr) throw deleteErr;
+        }
+
+        if (newRoomsList.length > 0) {
+          const roomsToUpsert = newRoomsList.map(r => ({
+            id: r.id,
+            name: r.name,
+            image: r.image,
+            styleTitle: r.styleTitle,
+            description: r.description,
+            details: r.details
+          }));
+
+          const { error: upsertErr } = await supabase
+            .from("rooms")
+            .upsert(roomsToUpsert);
+          if (upsertErr) throw upsertErr;
+        }
+        addToast("บันทึกการเปลี่ยนแปลงห้องไปยัง Supabase สำเร็จ", "success");
+      } catch (err) {
+        console.error("Error syncing rooms to Supabase:", err);
+        addToast("บันทึกข้อมูลไปยัง Supabase ไม่สำเร็จ: " + err.message, "error");
+      }
+    }
   };
 
   // Collage state per room
@@ -180,7 +217,7 @@ export default function App() {
     return defaultCollages;
   });
 
-  const updateRoomCollage = (roomId, updatedCollage) => {
+  const updateRoomCollage = async (roomId, updatedCollage) => {
     const newCollages = { ...roomCollages };
     if (updatedCollage === null) {
       delete newCollages[roomId];
@@ -189,6 +226,35 @@ export default function App() {
     }
     setRoomCollages(newCollages);
     localStorage.setItem("minimal_room_collages_v2", JSON.stringify(newCollages));
+
+    if (isSupabaseConfigured) {
+      try {
+        if (updatedCollage === null) {
+          const { error: deleteErr } = await supabase
+            .from("room_collages")
+            .delete()
+            .eq("room_id", roomId);
+          if (deleteErr) throw deleteErr;
+        } else {
+          const collageToUpsert = {
+            room_id: roomId,
+            img1: updatedCollage.img1 || null,
+            img2: updatedCollage.img2 || null,
+            img3: updatedCollage.img3 || null,
+            img4: updatedCollage.img4 || null,
+            img5: updatedCollage.img5 || null
+          };
+          const { error: upsertErr } = await supabase
+            .from("room_collages")
+            .upsert(collageToUpsert);
+          if (upsertErr) throw upsertErr;
+        }
+        addToast("บันทึกการเปลี่ยนแปลงภาพมุมย่อยไปยัง Supabase สำเร็จ", "success");
+      } catch (err) {
+        console.error("Error syncing collage to Supabase:", err);
+        addToast("บันทึกข้อมูลมุมย่อยไปยัง Supabase ไม่สำเร็จ: " + err.message, "error");
+      }
+    }
   };
   
   // Load products from localStorage or use defaults
@@ -220,6 +286,7 @@ export default function App() {
     }
     // Save defaults to localStorage initially
     localStorage.setItem("minimal_room_products_v3", JSON.stringify(defaultProducts));
+    return defaultProducts;
   });
 
   // Load catalog from localStorage or use defaults
@@ -254,9 +321,45 @@ export default function App() {
     return defaultCatalog;
   });
 
-  const updateCatalog = (newCatalog) => {
+  const updateCatalog = async (newCatalog) => {
     setCatalog(newCatalog);
     localStorage.setItem("minimal_room_catalog_v2", JSON.stringify(newCatalog));
+
+    if (isSupabaseConfigured) {
+      try {
+        const deletedCatalogIds = catalog
+          .filter(c => !newCatalog.some(nc => nc.id === c.id))
+          .map(c => c.id);
+
+        if (deletedCatalogIds.length > 0) {
+          const { error: deleteErr } = await supabase
+            .from("catalog")
+            .delete()
+            .in("id", deletedCatalogIds);
+          if (deleteErr) throw deleteErr;
+        }
+
+        if (newCatalog.length > 0) {
+          const catalogToUpsert = newCatalog.map(c => ({
+            id: c.id,
+            name: c.name,
+            price: c.price || null,
+            url: c.url || null,
+            image: c.image || null,
+            description: c.description || null
+          }));
+
+          const { error: upsertErr } = await supabase
+            .from("catalog")
+            .upsert(catalogToUpsert);
+          if (upsertErr) throw upsertErr;
+        }
+        addToast("บันทึกแคตตาล็อกสินค้าไปยัง Supabase สำเร็จ", "success");
+      } catch (err) {
+        console.error("Error syncing catalog to Supabase:", err);
+        addToast("บันทึกแคตตาล็อกไปยัง Supabase ไม่สำเร็จ: " + err.message, "error");
+      }
+    }
   };
 
   // Auto-sync with local disk in development environment
@@ -429,9 +532,53 @@ export default function App() {
 
 
   // Save changes to products list
-  const updateProducts = (newProductsList) => {
+  const updateProducts = async (newProductsList) => {
     setProducts(newProductsList);
     localStorage.setItem("minimal_room_products_v3", JSON.stringify(newProductsList));
+
+    if (isSupabaseConfigured) {
+      try {
+        const deletedProductIds = products
+          .filter(p => !newProductsList.some(np => np.id === p.id))
+          .map(p => p.id);
+
+        if (deletedProductIds.length > 0) {
+          const { error: deleteErr } = await supabase
+            .from("products")
+            .delete()
+            .in("id", deletedProductIds);
+          if (deleteErr) throw deleteErr;
+        }
+
+        if (newProductsList.length > 0) {
+          const productsToUpsert = newProductsList.map(p => ({
+            id: p.id,
+            roomId: p.roomId || null,
+            name: p.name,
+            price: p.price || null,
+            url: p.url || null,
+            description: p.description || null,
+            x: p.x !== undefined ? p.x : null,
+            y: p.y !== undefined ? p.y : null,
+            w: p.w !== undefined ? p.w : null,
+            h: p.h !== undefined ? p.h : null,
+            image: p.image || null,
+            displayType: p.displayType || null,
+            canvasType: p.canvasType || null,
+            catalogId: p.catalogId || null
+          }));
+
+          const { error: upsertErr } = await supabase
+            .from("products")
+            .upsert(productsToUpsert);
+          if (upsertErr) throw upsertErr;
+        }
+        addToast("บันทึกข้อมูลพิกัดจุดสินค้าไปยัง Supabase สำเร็จ", "success");
+      } catch (err) {
+        console.error("Error syncing products to Supabase:", err);
+        addToast("บันทึกพิกัดสินค้าไปยัง Supabase ไม่สำเร็จ: " + err.message, "error");
+      }
+    }
   };
 
   // Helper to normalize name for comparison: trim, lowercase, strip special characters/emojis
@@ -657,6 +804,204 @@ export default function App() {
     navigator.clipboard.writeText(`แจกพิกัดของแต่งห้องนอนมินิมอล จาก DREAM ROOM (${currentRoom?.name} สไตล์ ${currentRoom?.styleTitle}):\n${text}\n\nเข้าชมภาพจำลอง 3D และจัดงบประมาณด้วยตนเองได้ที่: https://shop-sell-peach.vercel.app/`);
     addToast("คัดลอกพิกัดสินค้าและลิงก์เรียบร้อยแล้ว!", "success");
   };
+
+  const [isSupabaseLoading, setIsSupabaseLoading] = useState(false);
+
+  const seedSupabaseDatabase = async () => {
+    try {
+      const roomsToInsert = defaultRooms.map(r => ({
+        id: r.id,
+        name: r.name,
+        image: r.image,
+        styleTitle: r.styleTitle,
+        description: r.description,
+        details: r.details
+      }));
+      
+      const { error: roomsErr } = await supabase
+        .from("rooms")
+        .insert(roomsToInsert);
+      if (roomsErr) throw roomsErr;
+
+      const collagesToInsert = [];
+      Object.entries(defaultCollages).forEach(([roomId, collage]) => {
+        collagesToInsert.push({
+          room_id: roomId,
+          img1: collage.img1 || null,
+          img2: collage.img2 || null,
+          img3: collage.img3 || null,
+          img4: collage.img4 || null,
+          img5: collage.img5 || null
+        });
+      });
+      if (collagesToInsert.length > 0) {
+        const { error: collagesErr } = await supabase
+          .from("room_collages")
+          .insert(collagesToInsert);
+        if (collagesErr) throw collagesErr;
+      }
+
+      const productsToInsert = defaultProducts.map(p => ({
+        id: p.id,
+        roomId: p.roomId || null,
+        name: p.name,
+        price: p.price || null,
+        url: p.url || null,
+        description: p.description || null,
+        x: p.x !== undefined ? p.x : null,
+        y: p.y !== undefined ? p.y : null,
+        w: p.w !== undefined ? p.w : null,
+        h: p.h !== undefined ? p.h : null,
+        image: p.image || null,
+        displayType: p.displayType || null,
+        canvasType: p.canvasType || null,
+        catalogId: p.catalogId || null
+      }));
+      const { error: productsErr } = await supabase
+        .from("products")
+        .insert(productsToInsert);
+      if (productsErr) throw productsErr;
+
+      const catalogToInsert = defaultCatalog.map(c => ({
+        id: c.id,
+        name: c.name,
+        price: c.price || null,
+        url: c.url || null,
+        image: c.image || null,
+        description: c.description || null
+      }));
+      const { error: catalogErr } = await supabase
+        .from("catalog")
+        .insert(catalogToInsert);
+      if (catalogErr) throw catalogErr;
+
+      addToast("นำเข้าข้อมูลเริ่มต้นไปยัง Supabase สำเร็จ!", "success");
+
+      setRooms(defaultRooms);
+      setRoomCollages(defaultCollages);
+      setProducts(defaultProducts);
+      setCatalog(defaultCatalog);
+
+      localStorage.setItem("minimal_room_list_v2", JSON.stringify(defaultRooms));
+      localStorage.setItem("minimal_room_collages_v2", JSON.stringify(defaultCollages));
+      localStorage.setItem("minimal_room_products_v3", JSON.stringify(defaultProducts));
+      localStorage.setItem("minimal_room_catalog_v2", JSON.stringify(defaultCatalog));
+
+    } catch (err) {
+      console.error("Failed to seed Supabase database:", err);
+      addToast("นำเข้าข้อมูลเริ่มต้นไม่สำเร็จ: " + err.message, "error");
+    }
+  };
+
+  useEffect(() => {
+    const loadDataFromSupabase = async () => {
+      if (!isSupabaseConfigured) return;
+      setIsSupabaseLoading(true);
+      try {
+        const { data: roomsData, error: roomsError } = await supabase
+          .from("rooms")
+          .select("*")
+          .order("created_at", { ascending: true });
+
+        if (roomsError) throw roomsError;
+
+        const { data: collagesData, error: collagesError } = await supabase
+          .from("room_collages")
+          .select("*");
+
+        if (collagesError) throw collagesError;
+
+        const { data: productsData, error: productsError } = await supabase
+          .from("products")
+          .select("*")
+          .order("created_at", { ascending: true });
+
+        if (productsError) throw productsError;
+
+        const { data: catalogData, error: catalogError } = await supabase
+          .from("catalog")
+          .select("*")
+          .order("created_at", { ascending: true });
+
+        if (catalogError) throw catalogError;
+
+        if (!roomsData || roomsData.length === 0) {
+          addToast("ระบบตรวจพบฐานข้อมูลว่าง กำลังนำเข้าข้อมูลเริ่มต้นไปยัง Supabase...", "info");
+          await seedSupabaseDatabase();
+          return;
+        }
+
+        const mappedRooms = roomsData.map(r => ({
+          id: r.id,
+          name: r.name,
+          image: r.image,
+          styleTitle: r.styleTitle,
+          description: r.description,
+          details: typeof r.details === "string" ? JSON.parse(r.details) : r.details
+        }));
+
+        const mappedCollages = {};
+        collagesData.forEach(c => {
+          mappedCollages[c.room_id] = {
+            img1: c.img1,
+            img2: c.img2,
+            img3: c.img3,
+            img4: c.img4,
+            img5: c.img5
+          };
+        });
+
+        const mappedProducts = productsData.map(p => ({
+          id: p.id,
+          roomId: p.roomId,
+          name: p.name,
+          price: p.price,
+          url: p.url,
+          description: p.description,
+          x: p.x,
+          y: p.y,
+          w: p.w,
+          h: p.h,
+          image: p.image,
+          displayType: p.displayType,
+          canvasType: p.canvasType,
+          catalogId: p.catalogId
+        }));
+
+        const mappedCatalog = catalogData.map(c => ({
+          id: c.id,
+          name: c.name,
+          price: c.price,
+          url: c.url,
+          image: c.image,
+          description: c.description
+        }));
+
+        setRooms(mappedRooms);
+        setRoomCollages(mappedCollages);
+        setProducts(mappedProducts);
+        setCatalog(mappedCatalog);
+
+        localStorage.setItem("minimal_room_list_v2", JSON.stringify(mappedRooms));
+        localStorage.setItem("minimal_room_collages_v2", JSON.stringify(mappedCollages));
+        localStorage.setItem("minimal_room_products_v3", JSON.stringify(mappedProducts));
+        localStorage.setItem("minimal_room_catalog_v2", JSON.stringify(mappedCatalog));
+
+        if (mappedRooms.length > 0 && !mappedRooms.some(r => r.id === currentRoomId)) {
+          setCurrentRoomId(mappedRooms[0].id);
+        }
+
+        addToast("โหลดข้อมูลเรียลไทม์จาก Supabase เรียบร้อยแล้ว", "success");
+      } catch (err) {
+        console.error("Error loading data from Supabase:", err);
+        addToast("ไม่สามารถโหลดข้อมูลจาก Supabase ได้ (สลับเป็นโหมดออฟไลน์)", "warning");
+      } finally {
+        setIsSupabaseLoading(false);
+      }
+    };
+
+    loadDataFromSupabase();
+  }, []);
 
   return (
     <div className="app-container">
