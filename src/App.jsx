@@ -823,16 +823,20 @@ export default function App() {
         .insert(roomsToInsert);
       if (roomsErr) throw roomsErr;
 
+      const validRoomIds = roomsToInsert.map(r => r.id);
+
       const collagesToInsert = [];
       Object.entries(defaultCollages).forEach(([roomId, collage]) => {
-        collagesToInsert.push({
-          room_id: roomId,
-          img1: collage.img1 || null,
-          img2: collage.img2 || null,
-          img3: collage.img3 || null,
-          img4: collage.img4 || null,
-          img5: collage.img5 || null
-        });
+        if (validRoomIds.includes(roomId)) {
+          collagesToInsert.push({
+            room_id: roomId,
+            img1: collage.img1 || null,
+            img2: collage.img2 || null,
+            img3: collage.img3 || null,
+            img4: collage.img4 || null,
+            img5: collage.img5 || null
+          });
+        }
       });
       if (collagesToInsert.length > 0) {
         const { error: collagesErr } = await supabase
@@ -841,26 +845,33 @@ export default function App() {
         if (collagesErr) throw collagesErr;
       }
 
-      const productsToInsert = defaultProducts.map(p => ({
-        id: p.id,
-        roomId: p.roomId || null,
-        name: p.name,
-        price: p.price || null,
-        url: p.url || null,
-        description: p.description || null,
-        x: p.x !== undefined ? p.x : null,
-        y: p.y !== undefined ? p.y : null,
-        w: p.w !== undefined ? p.w : null,
-        h: p.h !== undefined ? p.h : null,
-        image: p.image || null,
-        displayType: p.displayType || null,
-        canvasType: p.canvasType || null,
-        catalogId: p.catalogId || null
-      }));
-      const { error: productsErr } = await supabase
-        .from("products")
-        .insert(productsToInsert);
-      if (productsErr) throw productsErr;
+      const productsToInsert = [];
+      defaultProducts.forEach(p => {
+        if (!p.roomId || validRoomIds.includes(p.roomId)) {
+          productsToInsert.push({
+            id: p.id,
+            roomId: p.roomId || null,
+            name: p.name,
+            price: p.price || null,
+            url: p.url || null,
+            description: p.description || null,
+            x: p.x !== undefined ? p.x : null,
+            y: p.y !== undefined ? p.y : null,
+            w: p.w !== undefined ? p.w : null,
+            h: p.h !== undefined ? p.h : null,
+            image: p.image || null,
+            displayType: p.displayType || null,
+            canvasType: p.canvasType || null,
+            catalogId: p.catalogId || null
+          });
+        }
+      });
+      if (productsToInsert.length > 0) {
+        const { error: productsErr } = await supabase
+          .from("products")
+          .insert(productsToInsert);
+        if (productsErr) throw productsErr;
+      }
 
       const catalogToInsert = defaultCatalog.map(c => ({
         id: c.id,
